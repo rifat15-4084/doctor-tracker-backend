@@ -1,0 +1,53 @@
+# ---------------------------------------------------------------------------
+# Render Blueprint (Infrastructure as Code) for Doctor Tracker API
+#
+# Usage:
+#   1. Push this repository to GitHub.
+#   2. Render Dashboard -> New -> Blueprint -> select this repo.
+#   3. Fill in the values marked `sync: false` (MONGO_URI, CLIENT_URL).
+#   4. Render creates the service, runs `npm install` and `npm start`.
+#
+# Docs: https://render.com/docs/blueprint-spec
+# ---------------------------------------------------------------------------
+services:
+  - type: web
+    name: doctor-tracker-api
+    runtime: node
+    plan: free
+    region: oregon
+    branch: main
+    autoDeploy: true
+
+    # Build & start commands (identical to the manual settings in the README).
+    buildCommand: npm install
+    startCommand: npm start
+
+    # Render probes this path to decide whether the service is healthy.
+    healthCheckPath: /health
+
+    envVars:
+      # PORT is injected by Render automatically - do not set it here.
+      - key: NODE_ENV
+        value: production
+
+      # Set in the Render dashboard; never commit the real connection string.
+      - key: MONGO_URI
+        sync: false
+
+      # Render generates a strong secret on first deploy and keeps it stable.
+      - key: JWT_SECRET
+        generateValue: true
+
+      - key: JWT_EXPIRES_IN
+        value: 7d
+
+      # Exact frontend origin, e.g. https://doctor-tracker.vercel.app
+      # Multiple origins are comma separated.
+      - key: CLIENT_URL
+        sync: false
+
+      - key: RATE_LIMIT_ENABLED
+        value: "true"
+
+      - key: LOG_FORMAT
+        value: combined
